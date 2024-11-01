@@ -9,5 +9,5 @@ export const useGlobalState = (key: string, initialValue?: any) => {
   const setter = (newValue: any) => {
     useStore().getState().setState(key, newValue);
   };
-  return [getter, setter];
+  return [getter, setter] as const;
 };

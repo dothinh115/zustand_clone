@@ -59,7 +59,7 @@ export const createStore = <T = any>(
 
   const useStore = <S extends T>(
     selector?: (state: T) => any
-  ): { getState: () => T } | S => {
+  ): { getState: () => T } | any => {
     if (!selector) {
       return { getState };
     }
