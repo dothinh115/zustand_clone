@@ -2,7 +2,7 @@
 import { useGlobalState } from "@/hooks/useGlobalState";
 import { useEffect } from "react";
 export default function Section_1() {
-  const [count] = useGlobalState("count");
+  const [count] = useGlobalState("count", 1);
   useEffect(() => {
     console.log("section 1 rerendered");
   });
