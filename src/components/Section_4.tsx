@@ -6,7 +6,7 @@ export default function Section_4() {
   const [count] = useGlobalState("count");
 
   useEffect(() => {
-    console.log("section 3 rerendered");
+    console.log("section 4 rerendered");
   });
   return <>Section 4: {count}</>;
 }

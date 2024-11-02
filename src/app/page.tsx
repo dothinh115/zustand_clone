@@ -12,6 +12,7 @@ export default function Home() {
         <Section_2 />
         <Section_3 />
       </AppWrapper>
+      <br />
       <Link href="/protected">protected</Link>
     </div>
   );

@@ -1,56 +1,25 @@
-import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
 export const createStore = <T = any>(
   initialValue: (set: (update: (state: T) => any) => void) => T
 ) => {
   let store: T = initialValue(set);
-  const listeners = new Map<string, (() => void)[]>();
+  const listeners = new Set<() => void>();
 
   function set(update: (state: T) => any) {
-    const oldStore = { ...store };
     const newStore = update(store);
     store = {
       ...store,
       ...newStore,
     };
-    for (const key in store) {
-      if (!isEqual(oldStore[key], store[key])) {
-        const executeSetState = listeners.get(key);
-        if (executeSetState) {
-          executeSetState.forEach((func) => func());
-        }
-      }
-    }
+    listeners.forEach((listenner) => listenner());
   }
 
-  function subscribe(key: string, listener: () => void) {
-    if (!listeners.has(key)) {
-      listeners.set(key, []);
-    }
-    listeners.get(key)?.push(listener);
+  function subscribe(listener: () => void) {
+    listeners.add(listener);
     return () => {
-      const executeFuncArr = listeners.get(key);
-      if (executeFuncArr) {
-        listeners.set(
-          key,
-          executeFuncArr.filter((func) => func !== listener)
-        );
-        if (executeFuncArr.length === 1) {
-          listeners.delete(key);
-        }
-      }
+      listeners.delete(listener);
     };
-  }
-
-  function findKeyByValue(selector: (state: T) => any) {
-    const find = Object.entries(store as any).find(([key, value]) =>
-      isEqual(value, selector(store))
-    );
-    if (find) {
-      const [key] = find;
-      return key;
-    }
   }
 
   function getState(): T {
@@ -68,9 +37,8 @@ export const createStore = <T = any>(
     );
 
     useEffect(() => {
-      const key = findKeyByValue(selector);
       const handleChange = () => setSelectedState(selector(store));
-      const unSubscribe = subscribe(key as string, handleChange);
+      const unSubscribe = subscribe(handleChange);
 
       return unSubscribe;
     }, [selector]);
