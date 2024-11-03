@@ -8,7 +8,7 @@ export const useGlobalState = (key: string, initialValue?: any) => {
   };
 
   useEffect(() => {
-    if (initialValue) {
+    if (initialValue && !useStore().getState().hasOwnProperty(key)) {
       useStore().getState().setState(key, initialValue);
     }
   }, [key, initialValue]);
