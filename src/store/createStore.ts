@@ -1,21 +1,23 @@
+import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
 export const createStore = <T = any>(
   initialValue: (set: (update: (state: T) => any) => void) => T
 ) => {
   let store: T = initialValue(set);
-  const listeners = new Set<() => void>();
+  const listeners = new Set<(oldStore: T, newStore: T) => void>();
 
   function set(update: (state: T) => any) {
     const newStore = update(store);
+    const oldStore = store;
     store = {
       ...store,
       ...newStore,
     };
-    listeners.forEach((listenner) => listenner());
+    listeners.forEach((listenner) => listenner(oldStore, newStore));
   }
 
-  function subscribe(listener: () => void) {
+  function subscribe(listener: (oldStore: T, newStore: T) => void) {
     listeners.add(listener);
     return () => {
       listeners.delete(listener);
@@ -37,13 +39,18 @@ export const createStore = <T = any>(
     );
 
     useEffect(() => {
-      const handleChange = () => setSelectedState(selector(store));
+      const handleChange = (oldStore: T, newStore: T) => {
+        const equal = isEqual(oldStore, newStore);
+        if (!equal) {
+          setSelectedState(selector(store));
+        }
+      };
       const unSubscribe = subscribe(handleChange);
 
       return unSubscribe;
     }, [selector]);
 
-    return selectedState;
+    return selector(store) ?? "";
   };
 
   return useStore;
