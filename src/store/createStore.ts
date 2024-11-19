@@ -1,4 +1,3 @@
-import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
 
 export const createStore = <T = any>(
@@ -9,12 +8,13 @@ export const createStore = <T = any>(
 
   function set(update: (state: T) => any) {
     const newStore = update(store);
-    const oldStore = store;
     store = {
       ...store,
       ...newStore,
     };
-    listeners.forEach((listenner) => listenner());
+    Promise.resolve().then(() => {
+      listeners.forEach((listenner) => listenner());
+    });
   }
 
   function subscribe(listener: () => void) {
@@ -46,7 +46,7 @@ export const createStore = <T = any>(
       return unSubscribe;
     }, [selector]);
 
-    return selector(store) ?? "";
+    return selectedState;
   };
 
   return useStore;
