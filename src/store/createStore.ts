@@ -5,7 +5,7 @@ export const createStore = <T = any>(
   initialValue: (set: (update: (state: T) => any) => void) => T
 ) => {
   let store: T = initialValue(set);
-  const listeners = new Set<(oldStore: T, newStore: T) => void>();
+  const listeners = new Set<() => void>();
 
   function set(update: (state: T) => any) {
     const newStore = update(store);
@@ -14,10 +14,10 @@ export const createStore = <T = any>(
       ...store,
       ...newStore,
     };
-    listeners.forEach((listenner) => listenner(oldStore, newStore));
+    listeners.forEach((listenner) => listenner());
   }
 
-  function subscribe(listener: (oldStore: T, newStore: T) => void) {
+  function subscribe(listener: () => void) {
     listeners.add(listener);
     return () => {
       listeners.delete(listener);
@@ -39,12 +39,8 @@ export const createStore = <T = any>(
     );
 
     useEffect(() => {
-      const handleChange = (oldStore: T, newStore: T) => {
-        const equal = isEqual(oldStore, newStore);
-        if (!equal) {
-          setSelectedState(selector(store));
-        }
-      };
+      const handleChange = () => setSelectedState(selector(store));
+
       const unSubscribe = subscribe(handleChange);
 
       return unSubscribe;
